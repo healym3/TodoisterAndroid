@@ -55,9 +55,9 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
-            counter++;
-            Task task = new Task("Task" + counter, Priority.HIGH, Calendar.getInstance().getTime(), android.icu.util.Calendar.getInstance().getTime(), false);
-            TaskViewModel.insert(task);
+//            counter++;
+//            Task task = new Task("Task" + counter, Priority.HIGH, Calendar.getInstance().getTime(), android.icu.util.Calendar.getInstance().getTime(), false);
+//            TaskViewModel.insert(task);
         });
     }
 
