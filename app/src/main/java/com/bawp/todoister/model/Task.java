@@ -9,7 +9,7 @@ import java.util.Date;
 @Entity(tableName = "task_table")
 public class Task {
     @ColumnInfo(name = "task_id")
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     public long taskId;
 
 
