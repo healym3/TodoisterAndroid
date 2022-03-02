@@ -1,5 +1,6 @@
 package com.bawp.todoister;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.bawp.todoister.model.Priority;
+import com.bawp.todoister.model.SharedViewModel;
 import com.bawp.todoister.model.Task;
 import com.bawp.todoister.model.TaskViewModel;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -20,6 +22,7 @@ import com.google.android.material.chip.Chip;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.Calendar;
@@ -37,6 +40,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
     private Group calendarGroup;
     private Date dueDate;
     private Calendar calendar = Calendar.getInstance();
+    private SharedViewModel sharedViewModel;
+    private boolean isEdit;
 
     @Override
     public View onCreateView(
@@ -81,12 +86,56 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
             String task = enterTodo.getText().toString().trim();
             if(!TextUtils.isEmpty(task) && dueDate != null){
                 Task myTask = new Task(task, Priority.HIGH, dueDate, Calendar.getInstance().getTime(), false);
-                TaskViewModel.insert(myTask);
+                if(isEdit) {
+                    Task updateTask = sharedViewModel.getSelectedItem().getValue();
+                    updateTask.setTask(task);
+                    updateTask.setDueDate(dueDate);
+                    updateTask.setDateCreated(Calendar.getInstance().getTime());
+                    updateTask.setPriority(Priority.HIGH);
+                    TaskViewModel.update(updateTask);
+                    sharedViewModel.setIsEdit(false);
+                } else {
+                    TaskViewModel.insert(myTask);
+                }
+
             }
             dismiss();
 
         });
+
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        if (sharedViewModel.getSelectedItem().getValue() != null){
+            Task task = sharedViewModel.getSelectedItem().getValue();
+            enterTodo.setText(task.getTask());
+            dueDate = task.getDueDate();
+            calendarView.setDate(dueDate.getTime());
+        }
     }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        sharedViewModel.selectItem(null);
+        sharedViewModel.setIsEdit(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isEdit = sharedViewModel.getIsEdit();
+        if (sharedViewModel.getSelectedItem().getValue() != null){
+            Task task = sharedViewModel.getSelectedItem().getValue();
+            enterTodo.setText(task.getTask());
+            dueDate = task.getDueDate();
+            calendarView.setDate(dueDate.getTime());
+        } else {
+            enterTodo.setText("");
+            calendar.add(Calendar.DAY_OF_YEAR, 0);
+            dueDate = calendar.getTime();
+            calendarView.setDate(calendar.getTimeInMillis());
+        }
+    }
+
 
     @Override
     public void onClick(View view) {

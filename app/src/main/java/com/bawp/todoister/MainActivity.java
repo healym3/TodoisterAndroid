@@ -2,13 +2,13 @@ package com.bawp.todoister;
 
 import android.os.Bundle;
 
+import com.bawp.todoister.adapter.OnToDoClickListener;
 import com.bawp.todoister.adapter.RecyclerViewAdapter;
-import com.bawp.todoister.model.Priority;
+import com.bawp.todoister.model.SharedViewModel;
 import com.bawp.todoister.model.Task;
 import com.bawp.todoister.model.TaskViewModel;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -18,19 +18,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
-import android.view.View;
-
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Calendar;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnToDoClickListener {
     private TaskViewModel taskViewModel;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private int counter = 0;
+
     BottomSheetFragment bottomSheetFragment;
+    private SharedViewModel sharedViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +49,13 @@ public class MainActivity extends AppCompatActivity {
         taskViewModel = new ViewModelProvider.AndroidViewModelFactory(MainActivity.this.getApplication())
                 .create(TaskViewModel.class);
 
+
         taskViewModel.getAllTasks().observe(this, tasks -> {
-            recyclerViewAdapter = new RecyclerViewAdapter(tasks);
+            recyclerViewAdapter = new RecyclerViewAdapter(tasks, this);
             recyclerView.setAdapter(recyclerViewAdapter);
         });
 
-        counter++;
+
 //        Task task2 = new Task("Task" + counter, Priority.HIGH, Calendar.getInstance().getTime(), android.icu.util.Calendar.getInstance().getTime(), false);
 //        TaskViewModel.insert(task2);
 
@@ -66,8 +64,13 @@ public class MainActivity extends AppCompatActivity {
 //            counter++;
 //            Task task = new Task("Task" + counter, Priority.HIGH, Calendar.getInstance().getTime(), android.icu.util.Calendar.getInstance().getTime(), false);
 //            TaskViewModel.insert(task);
+            sharedViewModel.setIsEdit(false);
             showBottomSheetDialog();
         });
+
+        sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+
+
     }
 
     private void showBottomSheetDialog() {
@@ -94,5 +97,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onToDoClick(Task task) {
+        sharedViewModel.selectItem(task);
+        sharedViewModel.setIsEdit(true);
+        showBottomSheetDialog();
+    }
+
+    @Override
+    public void onToDoRadioButtonClick(Task task) {
+        TaskViewModel.delete(task);
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 }
