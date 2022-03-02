@@ -195,6 +195,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
             dueDate = calendar.getTime();
             calendarView.setDate(calendar.getTimeInMillis());
             priority = Priority.LOW;
+            priorityLow.setChecked(true);
         }
     }
 
