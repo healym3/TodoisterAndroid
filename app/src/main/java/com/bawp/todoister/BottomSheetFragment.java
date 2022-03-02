@@ -23,8 +23,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.Calendar;
+import java.util.Date;
 
-public class BottomSheetFragment extends BottomSheetDialogFragment {
+public class BottomSheetFragment extends BottomSheetDialogFragment implements View.OnClickListener{
     private EditText enterTodo;
     private ImageButton calendarButton;
     private ImageButton priorityButton;
@@ -34,6 +35,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private ImageButton saveButton;
     private CalendarView calendarView;
     private Group calendarGroup;
+    private Date dueDate;
+    private Calendar calendar = Calendar.getInstance();
 
     @Override
     public View onCreateView(
@@ -52,9 +55,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         priorityRadioGroup = view.findViewById(R.id.radioGroup_priority);
 
         Chip todayChip = view.findViewById(R.id.today_chip);
+        todayChip.setOnClickListener(this);
         Chip tomorrowChip = view.findViewById(R.id.tomorrow_chip);
+        tomorrowChip.setOnClickListener(this);
         Chip nextWeekChip = view.findViewById(R.id.next_week_chip);
-
+        nextWeekChip.setOnClickListener(this);
 
         return view;
     }
@@ -66,13 +71,48 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             calendarGroup.setVisibility(calendarGroup.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
         });
 
+        calendarView.setOnDateChangeListener((calendarView, year, month, dayOfMonth) -> {
+            calendar.clear();
+            calendar.set(year,month,dayOfMonth);
+            dueDate = calendar.getTime();
+        });
+
         saveButton.setOnClickListener(view1 -> {
             String task = enterTodo.getText().toString().trim();
-            if(!TextUtils.isEmpty(task)){
-                Task myTask = new Task(task, Priority.HIGH, Calendar.getInstance().getTime(), Calendar.getInstance().getTime(), false);
+            if(!TextUtils.isEmpty(task) && dueDate != null){
+                Task myTask = new Task(task, Priority.HIGH, dueDate, Calendar.getInstance().getTime(), false);
                 TaskViewModel.insert(myTask);
             }
+            dismiss();
 
         });
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch(id){
+            case R.id.today_chip:
+                calendar.add(Calendar.DAY_OF_YEAR, 0);
+                dueDate = calendar.getTime();
+
+
+                break;
+
+            case R.id.tomorrow_chip:
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
+                dueDate = calendar.getTime();
+
+                break;
+
+            case R.id.next_week_chip:
+                calendar.add(Calendar.DAY_OF_YEAR, 7);
+                dueDate = calendar.getTime();
+
+                break;
+
+            default:
+
+        }
     }
 }
