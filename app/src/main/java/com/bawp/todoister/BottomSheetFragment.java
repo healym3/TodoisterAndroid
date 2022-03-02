@@ -95,6 +95,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
             case R.id.today_chip:
                 calendar.add(Calendar.DAY_OF_YEAR, 0);
                 dueDate = calendar.getTime();
+                calendarView.setDate(calendar.getTimeInMillis());
 
 
                 break;
@@ -102,12 +103,14 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
             case R.id.tomorrow_chip:
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 dueDate = calendar.getTime();
+                calendarView.setDate(calendar.getTimeInMillis());
 
                 break;
 
             case R.id.next_week_chip:
                 calendar.add(Calendar.DAY_OF_YEAR, 7);
                 dueDate = calendar.getTime();
+                calendarView.setDate(calendar.getTimeInMillis());
 
                 break;
 
